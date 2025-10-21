@@ -51,7 +51,7 @@ const CardSection: FC = () => {
         );
 
         // Add hover animations for cards
-        gsap.utils.toArray(".card-item").forEach((card: any) => {
+        gsap.utils.toArray<HTMLElement>(".card-item").forEach((card) => {
             card.addEventListener("mouseenter", () => {
                 gsap.to(card, {
                     scale: 1.05,
