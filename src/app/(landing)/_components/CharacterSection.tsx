@@ -100,9 +100,8 @@ const CharacterSection: FC = () => {
 
   return (
     <div ref={sectionRef} className="character-to-prize-trigger w-full h-screen flex items-center justify-center bg-black overflow-hidden perspective">
-      <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-12">
-        {/* Gradient overlay for smooth transition */}
-        <div className="transition-from absolute inset-0 bg-gradient-to-b from-transparent via-black to-yellow-900/20 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black"></div>
+      <div className="container relative z-10 mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-12">
         {/* 3D Card Section */}
         <div className="w-full md:w-1/3 relative perspective">
           <div 

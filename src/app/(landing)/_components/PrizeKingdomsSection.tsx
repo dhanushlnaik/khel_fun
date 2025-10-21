@@ -119,26 +119,12 @@ const PrizeKingdomsSection = () => {
   }, []);
 
   return (
-    <div ref={sectionRef} className="h-screen bg-black overflow-hidden relative">
+    <div ref={sectionRef} className="prize-section h-screen bg-black overflow-hidden relative opacity-0">
       {/* Parallax Background */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-yellow-900/30 via-yellow-500/20 to-black/90"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,200,0,0.1)_0%,rgba(0,0,0,0.5)_100%)]"></div>
-        {/* Animated particles for transition effect */}
-        <div className="absolute inset-0 opacity-50">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-yellow-500/30 rounded-full animate-float"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${3 + Math.random() * 2}s`
-              }}
-            />
-          ))}
-        </div>
+        <div className="absolute inset-0 bg-black"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-yellow-900/20 via-black to-black"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,200,0,0.05)_0%,rgba(0,0,0,1)_100%)]"></div>
       </div>
 
       {/* Content */}

@@ -32,36 +32,34 @@ const LandingPage: FC = () => {
     });
 
     // Set up section transition
-    const transitionTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: ".character-to-prize-trigger",
-        start: "center center",
-        end: "bottom top",
-        scrub: 1,
-        pin: true,
-        pinSpacing: false,
-        onEnter: () => {
-          // Fade in the transition elements
-          gsap.to(".transition-from", {
-            opacity: 1,
-            duration: 1
-          });
-          
-          // Reveal the prize section background
-          gsap.to(".transition-bg", {
-            opacity: 1,
-            duration: 1.5,
-            ease: "power2.inOut"
-          });
-        },
-        onLeaveBack: () => {
-          // Reverse the transition when scrolling back
-          gsap.to([".transition-from", ".transition-bg"], {
-            opacity: 0,
-            duration: 0.5,
-            ease: "power2.in"
-          });
-        }
+    ScrollTrigger.create({
+      trigger: ".character-to-prize-trigger",
+      start: "top top",
+      end: "bottom center",
+      onEnter: () => {
+        gsap.to(".prize-section", {
+          opacity: 1,
+          duration: 0.5,
+          ease: "power2.inOut"
+        });
+      },
+      onLeave: () => {
+        gsap.to(".prize-section", {
+          opacity: 1,
+          duration: 0.5
+        });
+      },
+      onEnterBack: () => {
+        gsap.to(".prize-section", {
+          opacity: 1,
+          duration: 0.5
+        });
+      },
+      onLeaveBack: () => {
+        gsap.to(".prize-section", {
+          opacity: 0,
+          duration: 0.5
+        });
       }
     });
 
@@ -165,14 +163,7 @@ const LandingPage: FC = () => {
         <BottomBar />
       </div>
       <div className="relative">
-        {/* Transition overlay */}
-        <div className="transition-overlay fixed inset-0 bg-black pointer-events-none z-50 opacity-0"></div>
-        
         <CharacterSection />
-        
-        {/* Transition background */}
-        <div className="transition-bg fixed inset-0 bg-gradient-to-b from-yellow-500/20 to-black opacity-0 pointer-events-none"></div>
-        
         <PrizeKingdomsSection />
       </div>
     </div>
