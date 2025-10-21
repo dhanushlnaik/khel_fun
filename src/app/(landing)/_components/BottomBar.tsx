@@ -10,15 +10,9 @@ const BottomBar: FC = () => (
     <div className="flex gap-4 items-center">
       {/* Assuming 'ri-arrow-down-line' is available via a linked CSS/font file */}
       <i className="text-4xl ri-arrow-down-line"></i>
-      <h3 className="text-xl font-[Helvetica_Now_Display]">Scroll Down</h3>
+      <h3 className="text-xl font-robert-regular">Scroll Down</h3>
     </div>
     
-    {/* PS5 Logo/Image */}
-    <img
-      className="absolute h-[55px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-      src="./ps5.png"
-      alt="PlayStation 5 logo" // Added descriptive alt text for accessibility
-    />
   </div>
 );
 

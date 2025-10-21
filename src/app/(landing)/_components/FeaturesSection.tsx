@@ -3,10 +3,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import type { FC, ReactNode, RefObject } from "react";
 import { TiLocationArrow } from "react-icons/ti";
-// Assuming you have a custom font variable defined for headings
-// const FONT_CLASS = "special-font"; 
-
-// --- BentoTilt Component (Interactive Mouse Tilt Effect) ---
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
 interface BentoTiltProps {
   children: ReactNode;
@@ -69,35 +68,83 @@ interface BentoCardProps {
 }
 
 const BentoCard: FC<BentoCardProps> = ({ src, title, description, children }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    if (!cardRef.current) return;
+
+    const card = cardRef.current;
+    const timeline = gsap.timeline({ paused: true });
+
+    timeline
+      .to(card.querySelector('.card-bg'), {
+        scale: 1.1,
+        duration: 0.6,
+        ease: "power2.out"
+      })
+      .to(card.querySelector('.card-content'), {
+        y: -20,
+        duration: 0.4,
+        ease: "power2.out"
+      }, "-=0.6")
+      .to(card.querySelector('.card-title'), {
+        backgroundImage: "linear-gradient(45deg, #FFD700, #FFA500)",
+        backgroundClip: "text",
+        duration: 0.3
+      }, "-=0.4");
+
+    if (isHovered) {
+      timeline.play();
+    } else {
+      timeline.reverse();
+    }
+  }, [isHovered]);
+
   return (
-    <div className="relative size-full overflow-hidden rounded-xl">
-      {/* Video Background */}
-      {src && (
-        <video
-          src={src}
-          loop
-          muted
-          autoPlay
-          playsInline // Important for mobile performance
-          className="absolute left-0 top-0 size-full object-cover object-center transition-opacity duration-500 group-hover:opacity-100"
-        />
-      )}
+    <div 
+      ref={cardRef}
+      className="bento-card relative size-full overflow-hidden rounded-xl group"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Enhanced Background with Gradient Overlay */}
+      <div className="card-bg absolute inset-0 transform-gpu transition-transform duration-700">
+        {src ? (
+          <video
+            src={src}
+            loop
+            muted
+            autoPlay
+            playsInline
+            className="absolute left-0 top-0 size-full object-cover object-center"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-yellow-900/40"></div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60"></div>
+      </div>
       
-      {/* Content Overlay */}
-      <div className="relative z-10 flex size-full flex-col justify-between p-5 text-white bg-black/30 backdrop-blur-[1px]">
-        <div>
-          {/* Using the Knight Warrior font variable */}
-          <h1 className="bento-title text-4xl md:text-5xl font-[var(--font-knight-warrior)] uppercase tracking-wider">
+      {/* Enhanced Content Overlay */}
+      <div className="card-content relative z-10 flex size-full flex-col justify-between p-8 text-white">
+        <div className="space-y-4">
+          <h1 className="card-title text-4xl md:text-5xl font-[var(--font-knight-warrior)] uppercase tracking-wider bg-gradient-to-r from-white to-white bg-clip-text text-transparent">
             {title}
           </h1>
           {description && (
-            <p className="mt-3 max-w-64 text-xs md:text-base font-sans font-medium text-white/80">
+            <p className="card-description mt-3 max-w-64 text-sm md:text-base font-medium text-white/90 transform-gpu transition-all duration-500 group-hover:text-white">
               {description}
             </p>
           )}
         </div>
-        {children}
+        <div className="card-footer transform-gpu translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+          {children}
+        </div>
       </div>
+
+      {/* Interactive Elements */}
+      <div className="absolute inset-0 bg-gradient-to-t from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-yellow-600 transform scaleX-0 group-hover:scaleX-100 transition-transform duration-500"></div>
     </div>
   );
 };
@@ -105,11 +152,85 @@ const BentoCard: FC<BentoCardProps> = ({ src, title, description, children }) =>
 // --- Features Section (Main Layout) ---
 
 const Features: FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Main section entrance animation
+    gsap.from(sectionRef.current, {
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top center",
+        end: "center center",
+        scrub: 1
+      },
+      backgroundColor: "rgba(0,0,0,0)",
+      duration: 1
+    });
+
+    // Title animation with character split
+    const titleChars = titleRef.current?.textContent?.split("") || [];
+    if (titleRef.current) {
+      titleRef.current.textContent = "";
+      titleChars.forEach((char) => {
+        const span = document.createElement("span");
+        span.textContent = char;
+        span.className = "inline-block title-char";
+        titleRef.current?.appendChild(span);
+      });
+
+      gsap.from(".title-char", {
+        scrollTrigger: {
+          trigger: titleRef.current,
+          start: "top 80%",
+          end: "top 20%",
+          toggleActions: "play none none reverse"
+        },
+        opacity: 0,
+        y: gsap.utils.random(-100, 100, true),
+        rotateZ: gsap.utils.random(-90, 90, true),
+        stagger: {
+          amount: 1,
+          from: "random"
+        },
+        duration: 1.5,
+        ease: "elastic.out(1, 0.3)"
+      });
+    }
+
+    // Enhanced card animations
+    gsap.utils.toArray<HTMLElement>(".bento-card").forEach((card, i) => {
+      gsap.from(card, {
+        scrollTrigger: {
+          trigger: card,
+          start: "top 80%",
+          end: "top 20%",
+          toggleActions: "play complete play reverse"
+        },
+        opacity: 0,
+        y: 100,
+        rotateX: 30,
+        scale: 0.9,
+        duration: 1,
+        delay: i * 0.2,
+        ease: "power4.out"
+      });
+    });
+  }, []);
+
   return (
     // Added padding top to account for sticky Navbar
-    <section id="features" className="bg-black pt-20 pb-52"> 
+    <section ref={sectionRef} id="features" className="bg-black pt-20 pb-52 relative"> 
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-yellow-900/10 to-black opacity-50"></div>
+      
       {/* Section Title */}
-      <h2 className="text-center text-6xl md:text-8xl text-white mb-16 font-[var(--font-knight-warrior)] uppercase tracking-wider">
+      <h2 
+        ref={titleRef}
+        className="relative z-10 text-center text-6xl md:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 mb-16 font-[var(--font-knight-warrior)] uppercase tracking-wider"
+      >
         The Khel.Fun Suite
       </h2>
 

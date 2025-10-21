@@ -19,7 +19,7 @@ const IntroMask: FC = () => (
               textAnchor="middle"
               fill="white" 
               dominantBaseline="middle"
-              fontFamily="Arial Black"
+              fontFamily="zentry"
             >
               K.F
             </text>
