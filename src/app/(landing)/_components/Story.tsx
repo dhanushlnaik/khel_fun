@@ -82,7 +82,7 @@ const Story: React.FC = () => {  const frameRef = useRef<HTMLImageElement>(null)
   }, []);
 
   return (
-    <section ref={sectionRef} id="story" className="min-h-dvh w-screen bg-black text-blue-50 relative overflow-hidden py-20">
+    <section ref={sectionRef} id="story" className="w-screen bg-black text-blue-50 relative overflow-hidden py-20">
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-violet-500/10 rounded-full blur-[150px] animate-pulse-slow" />
@@ -95,7 +95,7 @@ const Story: React.FC = () => {  const frameRef = useRef<HTMLImageElement>(null)
         <div className="absolute top-[35%] right-[12%] w-3 h-3 bg-blue-400/40 rounded-full animate-float" style={{ animationDelay: "0.8s" }} />
         <div className="absolute top-[70%] left-[15%] w-2 h-2 bg-violet-300/40 rounded-full animate-float" style={{ animationDelay: "1.5s" }} />
       </div>
-      <div className="flex size-full flex-col items-center py-10 pb-24">
+      <div className="flex size-full flex-col items-center">
         <div className="relative size-full">
           <AnimatedTitle
             title="ONCHAIN GAMING X PROOF OF PLAY"

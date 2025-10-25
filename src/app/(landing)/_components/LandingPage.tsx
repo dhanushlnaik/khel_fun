@@ -143,7 +143,7 @@ const LandingPage: FC = () => {
   }, []);
 
   return (
-    <div ref={mainRef} className="relative h-dvh w-screen overflow-x-hidden">
+    <div ref={mainRef} className="relative min-h-screen w-screen overflow-x-hidden">
       <ScrollIndicator />
       <div className="landing overflow-hidden relative w-full h-screen bg-black">
         <Navbar />
@@ -170,7 +170,9 @@ const LandingPage: FC = () => {
         <BottomBar />
       </div>
       {/* Smooth section transitions */}
-      <div className="relative bg-black">
+      <div className="relative bg-black z-10 min-h-screen">
+        {/* Test visibility section */}
+        
         {/* About section commented out */}
         {/* <About /> */}
         

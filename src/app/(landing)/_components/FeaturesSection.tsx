@@ -205,7 +205,7 @@ const Features: React.FC = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="bg-black pb-52 pt-20 relative overflow-hidden">
+    <section ref={sectionRef} className="bg-black py-20 relative overflow-hidden">
       {/* Animated background gradients */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-violet-500/10 rounded-full blur-[150px] animate-pulse-slow" />

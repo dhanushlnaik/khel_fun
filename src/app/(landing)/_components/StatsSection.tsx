@@ -71,7 +71,7 @@ const StatsSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
 
   return (
-    <section ref={sectionRef} className="relative py-32 bg-black overflow-hidden">
+    <section ref={sectionRef} className="relative py-20 bg-black overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-violet-500/10 rounded-full blur-[150px] animate-pulse-slow" />
@@ -85,7 +85,7 @@ const StatsSection: React.FC = () => {
 
       <div className="container mx-auto px-6 md:px-10 relative z-10">
         {/* Section header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <div className="inline-block mb-4 px-6 py-2 rounded-full border border-violet-500/30 bg-violet-500/10">
             <span className="text-violet-300 font-mono text-sm uppercase tracking-widest">📊 Platform Stats</span>
           </div>
@@ -103,7 +103,7 @@ const StatsSection: React.FC = () => {
         </div>
 
         {/* Additional info */}
-        <div className="mt-16 text-center">
+        <div className="mt-12 text-center">
           <p className="text-violet-200/60 font-circular-web text-lg max-w-2xl mx-auto">
             Join thousands of players experiencing the future of gaming. Every game is verified on-chain, ensuring complete transparency and fairness.
           </p>

@@ -67,7 +67,7 @@ const Contact: React.FC = () => {
   }, []);
 
   return (
-    <div ref={sectionRef} id="contact" className="my-20 min-h-96 w-screen px-10 relative">
+    <div ref={sectionRef} id="contact" className="py-20 min-h-96 w-screen px-10 relative">
       {/* Background glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="contact-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-violet-500/10 rounded-full blur-[150px]" />
@@ -113,13 +113,43 @@ const Contact: React.FC = () => {
         </div>
 
         {/* Center content */}
-        <div className="flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center relative z-10 px-4">
+          {/* Badge */}
+          <div className="inline-block mb-6 px-6 py-2 rounded-full border border-violet-500/30 bg-violet-500/10">
+            <span className="text-violet-300 font-mono text-sm uppercase tracking-widest">💬 Get In Touch</span>
+          </div>
+          
           <AnimatedTitle
             title="let's b<b>u</b>ild the <br /> new era of <br /> g<b>a</b>ming t<b>o</b>gether."
             containerClass="special-font !md:text-[6.2rem] w-full font-zentry !text-5xl !font-black !leading-[.9]"
           />
+          
+          <p className="mt-6 text-violet-200/70 font-circular-web text-lg max-w-2xl">
+            Join our community of gamers and developers building the future of on-chain gaming.
+          </p>
 
-          <Button title="GG IRL" containerClass="mt-10 cursor-pointer" />
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 items-center">
+            <Button title="Join Discord" containerClass="cursor-pointer" />
+            <button className="px-8 py-3 rounded-full border-2 border-violet-500/50 text-violet-300 font-mono text-sm uppercase tracking-wider hover:bg-violet-500/10 transition-all duration-300 hover:scale-105">
+              Learn More
+            </button>
+          </div>
+          
+          {/* Social proof */}
+          <div className="mt-12 flex items-center gap-8 flex-wrap justify-center">
+            <div className="text-center">
+              <div className="text-2xl font-zentry font-bold text-violet-300">10K+</div>
+              <div className="text-sm text-violet-200/60">Community Members</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-zentry font-bold text-blue-300">24/7</div>
+              <div className="text-sm text-violet-200/60">Support Available</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-zentry font-bold text-violet-300">100%</div>
+              <div className="text-sm text-violet-200/60">Open Source</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
