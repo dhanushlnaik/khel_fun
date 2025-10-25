@@ -13,6 +13,12 @@ import CardSection from "./CardSection";
 import Navbar from "@/components/Navbar";
 import Features from "./FeaturesSection";
 import PrizeKingdomsSection from "./PrizeKingdomsSection";
+import About from "./About";
+import Story from "./Story";
+import Contact from "./Contact";
+import Footer from "./Footer";
+import ScrollIndicator from "./ScrollIndicator";
+import StatsSection from "./StatsSection";
 
 
 const LandingPage: FC = () => {
@@ -137,7 +143,8 @@ const LandingPage: FC = () => {
   }, []);
 
   return (
-    <div className="main w-full rotate-[-8deg] scale-[1.5]" ref={mainRef}>
+    <div ref={mainRef} className="relative h-dvh w-screen overflow-x-hidden">
+      <ScrollIndicator />
       <div className="landing overflow-hidden relative w-full h-screen bg-black">
         <Navbar />
 
@@ -162,10 +169,20 @@ const LandingPage: FC = () => {
         </div>
         <BottomBar />
       </div>
-      <div className="relative">
-        <CharacterSection />
-        <PrizeKingdomsSection />
+      {/* Smooth section transitions */}
+      <div className="relative bg-black">
+        {/* About section commented out */}
+        {/* <About /> */}
+        
+        <Features />
+        
+        <StatsSection />
+        
+        <Story />
+        
+        <Contact />
       </div>
+      <Footer />
     </div>
   );
 };

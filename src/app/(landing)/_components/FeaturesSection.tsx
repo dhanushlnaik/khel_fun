@@ -1,299 +1,297 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from "react";
-import type { FC, ReactNode, RefObject } from "react";
+import { useState, useRef, useEffect, ReactNode } from "react";
 import { TiLocationArrow } from "react-icons/ti";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import ScrollTrigger from "gsap/ScrollTrigger";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface BentoTiltProps {
   children: ReactNode;
   className?: string;
 }
 
-const BentoTilt: FC<BentoTiltProps> = ({ children, className = "" }) => {
+const BentoTilt: React.FC<BentoTiltProps> = ({ children, className = "" }) => {
   const [transformStyle, setTransformStyle] = useState<string>("");
   const itemRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  // Detect mobile on mount
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const currentItem = itemRef.current;
-    if (!currentItem) return;
+    // Disable tilt on mobile/touch devices
+    if (isMobile || !itemRef.current) return;
 
-    const { left, top, width, height } = currentItem.getBoundingClientRect();
+    const { left, top, width, height } = itemRef.current.getBoundingClientRect();
 
     const relativeX = (e.clientX - left) / width;
     const relativeY = (e.clientY - top) / height;
 
-    // Calculate tilt angle: 5 degrees max tilt
     const tiltX = (relativeY - 0.5) * 5;
     const tiltY = (relativeX - 0.5) * -5;
 
-    // Create the 3D CSS transform style
-    const newTransform = `
-      perspective(1000px) 
-      rotateX(${tiltX}deg) 
-      rotateY(${tiltY}deg) 
-      scale3d(1.0, 1.0, 1.0)
-    `;
+    const newTransform = `perspective(700px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(0.98, 0.98, 0.98)`;
     setTransformStyle(newTransform);
   };
 
   const handleMouseLeave = () => {
-    // Reset transform smoothly
-    setTransformStyle("perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1.0, 1.0, 1.0)");
+    if (!isMobile) {
+      setTransformStyle("");
+    }
   };
 
   return (
     <div
       ref={itemRef}
-      className={`transition-transform duration-300 ${className}`}
+      className={className}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={{ transform: transformStyle }}
+      style={{ transform: isMobile ? 'none' : transformStyle }}
     >
       {children}
     </div>
   );
 };
 
-// --- BentoCard Component (Content Wrapper) ---
-
 interface BentoCardProps {
-  src?: string; // Optional video source
+  src?: string;
   title: string;
   description?: string;
-  isCustomContent?: boolean; // Flag for special non-video content cards
-  children?: ReactNode;
+  players?: string;
+  status?: "LIVE" | "WIP";
+  link?: string;
 }
 
-const BentoCard: FC<BentoCardProps> = ({ src, title, description, children }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
-
-  useEffect(() => {
-    if (!cardRef.current) return;
-
-    const card = cardRef.current;
-    const timeline = gsap.timeline({ paused: true });
-
-    timeline
-      .to(card.querySelector('.card-bg'), {
-        scale: 1.1,
-        duration: 0.6,
-        ease: "power2.out"
-      })
-      .to(card.querySelector('.card-content'), {
-        y: -20,
-        duration: 0.4,
-        ease: "power2.out"
-      }, "-=0.6")
-      .to(card.querySelector('.card-title'), {
-        backgroundImage: "linear-gradient(45deg, #FFD700, #FFA500)",
-        backgroundClip: "text",
-        duration: 0.3
-      }, "-=0.4");
-
-    if (isHovered) {
-      timeline.play();
-    } else {
-      timeline.reverse();
+const BentoCard: React.FC<BentoCardProps> = ({ 
+  src, 
+  title, 
+  description, 
+  players = "1-4", 
+  status = "LIVE", 
+  link 
+}) => {
+  const isLive = status === "LIVE";
+  const statusColor = isLive ? "border-green-400/50" : "border-yellow-400/50";
+  const dotColor = isLive ? "bg-green-400" : "bg-yellow-400";
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  const handleClick = () => {
+    if (isLive && link) {
+      window.open(link, '_blank', 'noopener,noreferrer');
     }
-  }, [isHovered]);
+  };
 
+  // Prevent video autoplay issues on mobile
+  const handleVideoLoad = () => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {
+        // Autoplay prevented - this is fine for mobile
+      });
+    }
+  };
+  
   return (
-    <div 
-      ref={cardRef}
-      className="bento-card relative size-full overflow-hidden rounded-xl group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Enhanced Background with Gradient Overlay */}
-      <div className="card-bg absolute inset-0 transform-gpu transition-transform duration-700">
-        {src ? (
-          <video
-            src={src}
-            loop
-            muted
-            autoPlay
-            playsInline
-            className="absolute left-0 top-0 size-full object-cover object-center"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-yellow-900/40"></div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60"></div>
-      </div>
+    <div className="group relative size-full">
+      <video
+        ref={videoRef}
+        src={src}
+        loop
+        muted
+        playsInline
+        autoPlay
+        preload="metadata"
+        onLoadedData={handleVideoLoad}
+        className="absolute left-0 top-0 size-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+      />
       
-      {/* Enhanced Content Overlay */}
-      <div className="card-content relative z-10 flex size-full flex-col justify-between p-8 text-white">
-        <div className="space-y-4">
-          <h1 className="card-title text-4xl md:text-5xl font-[var(--font-knight-warrior)] uppercase tracking-wider bg-gradient-to-r from-white to-white bg-clip-text text-transparent">
-            {title}
-          </h1>
+      {/* Dark overlay on hover */}
+      <div className="absolute inset-0 bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      
+      <div className="relative z-10 flex size-full flex-col justify-between p-5 text-blue-50">
+        {/* Top Status Badges */}
+        <div className="flex items-start justify-between">
+          <div className={`flex items-center gap-2 rounded-full border ${statusColor} bg-black/50 px-3 py-1 backdrop-blur-sm`}>
+            <div className={`h-2 w-2 ${isLive ? 'animate-pulse' : ''} rounded-full ${dotColor}`} />
+            <span className="font-mono text-xs">{status}</span>
+          </div>
+          
+          <div className="rounded-full border border-violet-300/50 bg-black/50 px-3 py-1 backdrop-blur-sm">
+            <span className="font-mono text-xs">{players} Players</span>
+          </div>
+        </div>
+        
+        {/* Bottom Title and Description */}
+        <div>
+          <h1 className="bento-title special-font drop-shadow-lg">{title}</h1>
           {description && (
-            <p className="card-description mt-3 max-w-64 text-sm md:text-base font-medium text-white/90 transform-gpu transition-all duration-500 group-hover:text-white">
+            <p className="mt-3 max-w-64 text-xs opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:text-base">
               {description}
             </p>
           )}
-        </div>
-        <div className="card-footer transform-gpu translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-          {children}
+          
+          {/* Play Button appears on hover - different text for WIP */}
+          <button 
+            onClick={handleClick}
+            disabled={!isLive}
+            className={`mt-4 rounded-full border-2 border-white bg-violet-300 px-6 py-2 font-bold uppercase opacity-0 transition-all duration-300 group-hover:opacity-100 ${
+              isLive ? 'hover:bg-white hover:text-violet-300 cursor-pointer' : 'cursor-not-allowed opacity-70'
+            }`}
+          >
+            {isLive ? 'Play Now →' : 'Coming Soon'}
+          </button>
         </div>
       </div>
-
-      {/* Interactive Elements */}
-      <div className="absolute inset-0 bg-gradient-to-t from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-yellow-600 transform scaleX-0 group-hover:scaleX-100 transition-transform duration-500"></div>
     </div>
   );
 };
 
-// --- Features Section (Main Layout) ---
-
-const Features: FC = () => {
+const Features: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    if (!sectionRef.current) return;
 
-    // Main section entrance animation
-    gsap.from(sectionRef.current, {
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top center",
-        end: "center center",
-        scrub: 1
-      },
-      backgroundColor: "rgba(0,0,0,0)",
-      duration: 1
-    });
-
-    // Title animation with character split
-    const titleChars = titleRef.current?.textContent?.split("") || [];
-    if (titleRef.current) {
-      titleRef.current.textContent = "";
-      titleChars.forEach((char) => {
-        const span = document.createElement("span");
-        span.textContent = char;
-        span.className = "inline-block title-char";
-        titleRef.current?.appendChild(span);
-      });
-
-      gsap.from(".title-char", {
+    const ctx = gsap.context(() => {
+      // Fade in section
+      gsap.from(sectionRef.current, {
         scrollTrigger: {
-          trigger: titleRef.current,
+          trigger: sectionRef.current,
           start: "top 80%",
           end: "top 20%",
-          toggleActions: "play none none reverse"
-        },
-        opacity: 0,
-        y: gsap.utils.random(-100, 100, true),
-        rotateZ: gsap.utils.random(-90, 90, true),
-        stagger: {
-          amount: 1,
-          from: "random"
-        },
-        duration: 1.5,
-        ease: "elastic.out(1, 0.3)"
-      });
-    }
-
-    // Enhanced card animations
-    gsap.utils.toArray<HTMLElement>(".bento-card").forEach((card, i) => {
-      gsap.from(card, {
-        scrollTrigger: {
-          trigger: card,
-          start: "top 80%",
-          end: "top 20%",
-          toggleActions: "play complete play reverse"
+          scrub: 1,
         },
         opacity: 0,
         y: 100,
-        rotateX: 30,
-        scale: 0.9,
-        duration: 1,
-        delay: i * 0.2,
-        ease: "power4.out"
       });
-    });
+
+      // Animate title
+      if (titleRef.current) {
+        gsap.from(titleRef.current, {
+          scrollTrigger: {
+            trigger: titleRef.current,
+            start: "top 80%",
+            end: "top 40%",
+            scrub: 1,
+          },
+          opacity: 0,
+          y: 50,
+          scale: 0.9,
+        });
+      }
+
+      // Animate cards
+      gsap.utils.toArray<HTMLElement>(".bento-tilt_1, .bento-tilt_2, .zunno-glow-card").forEach((card, i) => {
+        gsap.from(card, {
+          scrollTrigger: {
+            trigger: card,
+            start: "top 85%",
+            end: "top 50%",
+            scrub: 1,
+          },
+          opacity: 0,
+          y: 80,
+          scale: 0.95,
+          rotateX: 10,
+        });
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, []);
 
   return (
-    // Added padding top to account for sticky Navbar
-    <section ref={sectionRef} id="features" className="bg-black pt-20 pb-52 relative"> 
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-yellow-900/10 to-black opacity-50"></div>
+    <section ref={sectionRef} className="bg-black pb-52 pt-20 relative overflow-hidden">
+      {/* Animated background gradients */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-violet-500/10 rounded-full blur-[150px] animate-pulse-slow" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] animate-pulse-slow" style={{ animationDelay: "1s" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-400/5 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: "2s" }} />
+      </div>
+      
+      {/* Floating particles */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[20%] left-[10%] w-2 h-2 bg-violet-400/30 rounded-full animate-float" />
+        <div className="absolute top-[40%] right-[15%] w-3 h-3 bg-blue-400/30 rounded-full animate-float" style={{ animationDelay: "1s" }} />
+        <div className="absolute top-[60%] left-[20%] w-2 h-2 bg-violet-300/30 rounded-full animate-float" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-[80%] right-[25%] w-2 h-2 bg-blue-300/30 rounded-full animate-float" style={{ animationDelay: "1.5s" }} />
+      </div>
       
       {/* Section Title */}
-      <h2 
-        ref={titleRef}
-        className="relative z-10 text-center text-6xl md:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 mb-16 font-[var(--font-knight-warrior)] uppercase tracking-wider"
-      >
-        The Khel.Fun Suite
-      </h2>
-
-      <div className="container mx-auto px-4 md:px-10">
-        
-        {/* Row 1: Large Bento Card (Zunno) */}
-        <BentoTilt className="relative mb-7 h-96 w-full overflow-hidden rounded-xl border border-white/20 shadow-2xl hover:shadow-yellow-500/30 transition-shadow md:h-[65vh]">
+      <div ref={titleRef} className="relative z-10 text-center pb-16">
+        <div className="inline-block mb-4 px-6 py-2 rounded-full border border-violet-500/30 bg-violet-500/10">
+          <span className="text-violet-300 font-mono text-sm uppercase tracking-widest">⚔️ Game Collection</span>
+        </div>
+        <h2 className="text-5xl md:text-7xl font-zentry font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-violet-300 to-blue-400 uppercase tracking-wider">
+          Game Arsenal
+        </h2>
+        <p className="mt-4 text-violet-200/70 font-circular-web text-lg max-w-2xl mx-auto">Choose your battlefield and dominate the competition</p>
+      </div>
+      <div className="container mx-auto px-3 md:px-10">
+        <BentoTilt className="border-hsla relative mb-7 h-96 w-full overflow-hidden rounded-md md:h-[65vh] zunno-glow-card">
           <BentoCard
-            src="/videos/feature-1.mp4"
+            src="videos/feature-1.mp4"
             title="Zunno"
-            description="The ultimate skill-based card game. Challenge players globally and climb the leaderboards."
+            description="Experience the thrill of traditional Zunno game on blockchain"
+            players="2-4"
+            status="LIVE"
+            link="https://zunno.xyz"
           />
         </BentoTilt>
 
-        {/* Row 2 & 3: Grid Layout */}
-        <div className="grid h-[135vh] grid-cols-2 grid-rows-3 gap-5 md:gap-7">
-          
-          {/* Card 2: POKER (Spanning 2 rows) */}
-          <BentoTilt className="col-span-2 row-span-1 overflow-hidden rounded-xl border border-white/20 shadow-2xl hover:shadow-yellow-500/30 transition-shadow md:col-span-1 md:row-span-2">
-            <BentoCard 
-              src="/videos/feature-2.mp4"
-              title="POKER"
-              description="Hold 'em, Omaha, and more. Experience authentic, high-stakes poker action."
-            />
-          </BentoTilt>
+        <div className="grid h-[135vh] grid-cols-2 grid-rows-3 gap-7">
+            <BentoTilt className="bento-tilt_1 row-span-1 md:col-span-1 md:row-span-2">
+                <BentoCard 
+                  src="videos/feature-2.mp4"
+                  title="POKER"
+                  description="Classic Texas Hold'em with crypto stakes - Coming Soon"
+                  players="2-8"
+                  status="WIP"
+                />
+            </BentoTilt>
 
-          {/* Card 3: 3-PATTI (Tall Card) */}
-          <BentoTilt className="col-span-2 row-span-1 overflow-hidden rounded-xl border border-white/20 shadow-2xl hover:shadow-yellow-500/30 transition-shadow md:col-span-1 md:row-span-1">
-            <BentoCard 
-              src="/videos/feature-3.mp4"
-              title="3-PATTI"
-              description="Fast, fun, and easy to learn. The classic Indian card game, modernized."
-            />
-          </BentoTilt>
+            <BentoTilt className="bento-tilt_1 row-span-1 ms-32 md:col-span-1 md:ms-0">
+                <BentoCard 
+                  src="videos/feature-3.mp4"
+                  title="3-PATTI"
+                  description="Indian card game favorite with blockchain rewards - Coming Soon"
+                  players="2-6"
+                  status="WIP"
+                />
+            </BentoTilt>
 
-          {/* Card 4: Tic Tac Toe */}
-          <BentoTilt className="col-span-2 row-span-1 overflow-hidden rounded-xl border border-white/20 shadow-2xl hover:shadow-yellow-500/30 transition-shadow md:col-span-1 md:row-span-1">
-            <BentoCard 
-              src="/videos/feature-4.mp4"
-              title="TIC TAC TOE"
-              description="A quick multiplayer classic for when you need a break."
-            />
-          </BentoTilt>
-          
-          {/* Card 5: More Coming Soon (Custom Content) */}
-          <BentoTilt className="col-span-2 row-span-1 overflow-hidden rounded-xl border border-white/20 shadow-2xl hover:shadow-yellow-500/30 transition-shadow md:col-span-1 md:row-span-1">
-            <div className="flex size-full flex-col justify-between bg-violet-800 p-8">
-              <h1 className="text-4xl md:text-5xl font-[var(--font-knight-warrior)] uppercase text-yellow-300">
-                <span className="text-white">More</span> co<span className="text-white">m</span>ing s<span className="text-white">o</span>on!
-              </h1>
-              {/* Gold arrow icon */}
-              <TiLocationArrow className="m-5 scale-[5] self-end text-yellow-500/70"/>
-            </div>
-          </BentoTilt>
+            <BentoTilt className="bento-tilt_1 me-14 md:col-span-1 md:me-0">
+                <BentoCard 
+                  src="videos/feature-4.mp4"
+                  title="TIC TAC TOE"
+                  description="Quick matches, instant payouts - Coming Soon"
+                  players="2"
+                  status="WIP"
+                />
+            </BentoTilt>
+        
+            <BentoTilt  className="bento-tilt_2">
+                <div className="flex size-full flex-col justify-between bg-violet-300 p-5">
+                    <h1 className="bento-title special-font max-w-64 text-black">M<b>o</b>re co<b>m</b>ing s<b>o</b>on!</h1>
 
-          {/* Card 6: Showcase Video */}
-          <BentoTilt className="col-span-2 row-span-1 overflow-hidden rounded-xl border border-white/20 shadow-2xl hover:shadow-yellow-500/30 transition-shadow md:col-span-2 md:row-span-1">
-            <BentoCard
-              src="/videos/feature-5.mp4"
-              title="Global Competition"
-              description="Play against friends and rivals worldwide for ultimate glory and rewards."
-            />
-          </BentoTilt>
+                    <TiLocationArrow className="m-5 scale-[5] self-end"/>
+                </div>
+            </BentoTilt>
+
+            <BentoTilt className="bento-tilt_2">
+                <video 
+                 src="videos/feature-5.mp4"
+                 loop
+                 muted
+                 autoPlay
+                 className="size-full object-cover object-center"
+                />
+            </BentoTilt>
+
         </div>
       </div>
     </section>

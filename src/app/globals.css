@@ -247,3 +247,206 @@
     opacity: 0.8;
   }
 }
+
+/* ---------- Custom Animations ---------- */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ---------- About Section Cube Animation ---------- */
+#clip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cube-grid-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  width: 40vw;
+  height: 40vw;
+  max-width: 500px;
+  max-height: 500px;
+  border-radius: 20px;
+  overflow: visible;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 4px;
+  perspective: 1500px;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  background: transparent;
+  pointer-events: none;
+}
+
+.cube-grid-container .cube-piece {
+  pointer-events: auto;
+}
+
+.cube-piece {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-size: 400% 400%;
+  border-radius: 8px;
+  box-shadow: 
+    0 4px 15px rgba(87, 36, 255, 0.2),
+    inset 0 0 20px rgba(0, 0, 0, 0.1);
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  transition: box-shadow 0.3s ease;
+  backface-visibility: visible;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cube-piece::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(87, 36, 255, 0.15) 0%,
+    transparent 50%,
+    rgba(79, 183, 221, 0.15) 100%
+  );
+  border-radius: 8px;
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+  animation: shimmer 3s ease-in-out infinite;
+  animation-delay: calc(var(--row) * 0.1s + var(--col) * 0.1s);
+}
+
+.cube-piece::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    45deg,
+    rgba(87, 36, 255, 0.5),
+    rgba(79, 183, 221, 0.5)
+  );
+  border-radius: 8px;
+  opacity: 0;
+  filter: blur(10px);
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@media (max-width: 768px) {
+  .cube-grid-container {
+    width: 70vw;
+    height: 70vw;
+    perspective: 800px;
+  }
+  
+  .cube-piece {
+    border-radius: 4px;
+    gap: 2px;
+  }
+
+  /* Disable 3D transforms on mobile for better performance */
+  .bento-tilt_1,
+  .bento-tilt_2 {
+    transform: none !important;
+  }
+
+  /* Optimize video performance on mobile */
+  video {
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* Reduce animation complexity on mobile */
+  .cube-piece {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+  }
+
+  /* Improve touch targets */
+  .nav-hover-btn-enhanced {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+
+  /* Prevent text selection issues */
+  .bento-title,
+  .special-font {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+.sword-man-clip-path {
+  clip-path: polygon(16% 0, 89% 15%, 75% 100%, 0 97%);
+}
+
+.contact-clip-path-1 {
+  clip-path: polygon(25% 0%, 74% 0, 69% 64%, 34% 73%);
+}
+
+.contact-clip-path-2 {
+  clip-path: polygon(29% 15%, 85% 30%, 50% 100%, 10% 64%);
+}
+
+/* Floating animation for particles */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-10px);
+  }
+  75% {
+    transform: translateY(-15px) translateX(5px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Pulse slow animation */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}

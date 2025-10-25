@@ -14,10 +14,12 @@ const Navbar: FC = () => {
   // State for toggling audio and visual indicator
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isIndicatorActive, setIsIndicatorActive] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   // Refs for audio and navigation container, typed for clarity
   const audioElementRef = useRef<HTMLAudioElement>(null);
   const navContainerRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
   const { y: currentScrollY } = useWindowScroll();
   const [isNavVisible, setIsNavVisible] = useState(true);
@@ -41,10 +43,15 @@ const Navbar: FC = () => {
     }
   }, [isAudioPlaying]);
 
-  // Manage scroll-based visibility and floating class
+  // Manage scroll-based visibility, floating class, and progress
   useEffect(() => {
     const container = navContainerRef.current;
     if (!container) return;
+
+    // Calculate scroll progress
+    const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = (currentScrollY / windowHeight) * 100;
+    setScrollProgress(progress);
 
     if (currentScrollY === 0) {
       // Topmost position: show navbar without floating-nav
@@ -66,13 +73,24 @@ const Navbar: FC = () => {
   useEffect(() => {
     if (navContainerRef.current) {
       gsap.to(navContainerRef.current, {
-        y: isNavVisible ? 0 : -100, // Move up/down
-        opacity: isNavVisible ? 1 : 0, // Fade in/out
-        duration: 0.3, // Slightly longer duration for smoother feel
-        ease: "power2.out",
+        y: isNavVisible ? 0 : -100,
+        opacity: isNavVisible ? 1 : 0,
+        duration: 0.4,
+        ease: "power3.out",
       });
     }
   }, [isNavVisible]);
+
+  // Animate progress bar
+  useEffect(() => {
+    if (progressBarRef.current) {
+      gsap.to(progressBarRef.current, {
+        scaleX: scrollProgress / 100,
+        duration: 0.2,
+        ease: "none",
+      });
+    }
+  }, [scrollProgress]);
 
   return (
     <div
@@ -81,7 +99,16 @@ const Navbar: FC = () => {
       className="fixed inset-x-0 top-4 z-50 h-16 transition-all duration-700 sm:inset-x-6 "
     >
       <header className="absolute top-1/2 w-full -translate-y-1/2">
-        <nav className="flex size-full items-center justify-between p-4 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-2xl">
+        {/* Scroll progress bar */}
+        <div className="absolute bottom-0 left-0 h-0.5 w-full bg-white/10 rounded-full overflow-hidden">
+          <div 
+            ref={progressBarRef}
+            className="h-full bg-gradient-to-r from-violet-400 via-violet-300 to-blue-400 origin-left"
+            style={{ transform: 'scaleX(0)' }}
+          />
+        </div>
+        
+        <nav className="flex size-full items-center justify-between p-4 bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-2xl hover:shadow-violet-500/20 transition-shadow duration-300">
           
           {/* Logo and product button */}
           <div className="flex items-center gap-7">
